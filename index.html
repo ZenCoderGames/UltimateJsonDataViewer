@@ -979,7 +979,7 @@
 
             navigateToReference(targetRef) {
                 debugLog(`Navigating to reference: ${targetRef}`);
-                
+
                 const targetItem = this.flattenedData.find(item => {
                     if (item.data.id) {
                         return item.data.id.toString().toLowerCase() === targetRef.toLowerCase();
@@ -988,7 +988,23 @@
                 });
 
                 if (targetItem) {
-                    this.scrollToItem(targetItem.id);
+                    // Check if the item is currently visible in the DOM
+                    const element = document.getElementById(targetItem.id);
+
+                    if (element) {
+                        // Item is visible, scroll to it directly
+                        this.scrollToItem(targetItem.id);
+                    } else {
+                        // Item exists but not currently visible - perform global search to find it
+                        debugLog(`Target not visible, performing global search for: ${targetRef}`);
+                        document.getElementById('globalSearch').value = targetRef;
+                        this.handleGlobalSearch(targetRef);
+
+                        // After the display updates, scroll to the item
+                        setTimeout(() => {
+                            this.scrollToItem(targetItem.id);
+                        }, 100);
+                    }
                 } else {
                     debugLog(`Target not found for reference: ${targetRef}`);
                 }
