@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate JSON Navigator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .upload-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        .upload-section h2 {
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .file-input-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+
+        .search-section {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .search-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .search-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .search-input, .filter-select {
+            padding: 12px 20px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .stats-section {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .data-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .data-section h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .data-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .list-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .list-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-item.highlight {
+            animation: highlight-pulse 0.5s ease;
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+        }
+
+        @keyframes highlight-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .item-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .item-source {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .item-content {
+            display: grid;
+            gap: 12px;
+        }
+
+        .content-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+        }
+
+        .content-key {
+            font-weight: 600;
+            color: #4facfe;
+            min-width: 120px;
+        }
+
+        .content-value {
+            flex: 1;
+            color: #333;
+            word-break: break-word;
+        }
+
+        .content-value.clickable {
+            color: #0066cc;
+            text-decoration: underline;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .content-value.clickable:hover {
+            color: #0052a3;
+        }
+
+        .content-value.expandable {
+            color: #cc6600;
+            text-decoration: underline;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .content-value.expandable:hover {
+            color: #994d00;
+        }
+
+        .expanded-content {
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-left: 3px solid #4facfe;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .reference-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #ffeaa7;
+            color: #2d3436;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .highlight-term {
+            background-color: #00ff00;
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .debug-log {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .debug-log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-left: 3px solid #4facfe;
+            padding-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .search-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧭 Ultimate JSON Navigator</h1>
+            <p>Explore Interlinked JSON Data with Intelligent Reference Detection</p>
+        </div>
+
+        <div class="content">
+            <div class="upload-section">
+                <h2>📁 Load JSON Files</h2>
+                <p style="margin-bottom: 20px;">Select a folder containing JSON files to begin exploration</p>
+                <div class="file-input-wrapper">
+                    <input type="file" 
+                           id="fileInput" 
+                           class="file-input" 
+                           webkitdirectory 
+                           directory 
+                           multiple
+                           accept=".json">
+                    <label for="fileInput" class="file-input-button">Choose Folder</label>
+                </div>
+            </div>
+
+            <div id="searchSection" class="search-section" style="display: none;">
+                <h3>🔍 Search & Filter</h3>
+                <div class="search-controls">
+                    <input type="text" 
+                           id="globalSearch" 
+                           class="search-input" 
+                           placeholder="Global Search (across all files)...">
+                    <input type="text" 
+                           id="localSearch" 
+                           class="search-input" 
+                           placeholder="Local Search (filter current results)...">
+                    <select id="fileFilter" class="filter-select">
+                        <option value="">All Files</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="statsSection" class="stats-section" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="filesCount">0</div>
+                        <div class="stat-label">Files Loaded</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="itemsCount">0</div>
+                        <div class="stat-label">Total Items</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="referencesCount">0</div>
+                        <div class="stat-label">References Found</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dataSection" class="data-section" style="display: none;">
+                <h3>📊 Data Explorer</h3>
+                <div id="dataList" class="data-list"></div>
+            </div>
+
+            <div id="debugLog" class="debug-log" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const DEBUG = false;
+
+        function debugLog(message) {
+            if (!DEBUG) return;
+            
+            const logContainer = document.getElementById('debugLog');
+            const entry = document.createElement('div');
+            entry.className = 'debug-log-entry';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            console.log('[JSON Viewer Debug]:', message);
+        }
+
+        class JSONDataViewer {
+            constructor() {
+                this.jsonData = {};
+                this.flattenedData = [];
+                this.references = new Map();
+                this.currentFilter = '';
+                this.currentFileFilter = '';
+                this.currentGlobalFilter = '';
+                this.currentLocalSearchFilter = '';
+                this.currentItemId = null;
+                
+                this.init();
+                debugLog('JSONDataViewer initialized');
+            }
+
+            init() {
+                const fileInput = document.getElementById('fileInput');
+                fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+
+                const globalSearch = document.getElementById('globalSearch');
+                globalSearch.addEventListener('input', (e) => this.handleGlobalSearch(e.target.value));
+
+                const localSearch = document.getElementById('localSearch');
+                localSearch.addEventListener('input', (e) => this.handleLocalSearch(e.target.value));
+
+                const fileFilter = document.getElementById('fileFilter');
+                fileFilter.addEventListener('change', (e) => this.handleFileFilter(e.target.value));
+
+                if (DEBUG) {
+                    document.getElementById('debugLog').style.display = 'block';
+                }
+            }
+
+            async handleFileSelect(event) {
+                const files = Array.from(event.target.files);
+                debugLog(`Selected ${files.length} files`);
+                
+                this.jsonData = {};
+                this.flattenedData = [];
+                this.references.clear();
+
+                for (const file of files) {
+                    if (file.name.endsWith('.json')) {
+                        try {
+                            const content = await this.readFile(file);
+                            const data = JSON.parse(content);
+                            this.jsonData[file.name] = data;
+                            debugLog(`Loaded: ${file.name}`);
+                        } catch (error) {
+                            debugLog(`Error loading ${file.name}: ${error.message}`);
+                        }
+                    }
+                }
+
+                this.processData();
+                this.updateUI();
+            }
+
+            readFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = (e) => reject(e);
+                    reader.readAsText(file);
+                });
+            }
+
+            processData() {
+                debugLog('Processing data...');
+                this.flattenedData = [];
+                
+                Object.entries(this.jsonData).forEach(([filename, data]) => {
+                    this.flattenJSON(data, filename);
+                });
+
+                this.detectReferences();
+                debugLog(`Processed ${this.flattenedData.length} items with ${this.references.size} unique references`);
+            }
+
+            flattenJSON(data, filename, parentPath = '') {
+                if (Array.isArray(data)) {
+                    // Create entries for objects in this array
+                    data.forEach((item, index) => {
+                        const currentPath = parentPath ? `${parentPath}[${index}]` : `[${index}]`;
+
+                        if (typeof item === 'object' && item !== null) {
+                            const id = item.id || item.name || `${filename}_${this.flattenedData.length}`;
+                            const title = item.name || item.title || item.id || 'Unnamed Item';
+
+                            this.flattenedData.push({
+                                id: `${filename}_${id}_${this.flattenedData.length}`,
+                                filename: filename,
+                                title: title,
+                                data: item,
+                                parentPath: currentPath
+                            });
+                            // Don't recurse into entry objects - their properties (including arrays) stay as fields
+                        }
+                    });
+                } else if (typeof data === 'object' && data !== null) {
+                    // Traverse objects to find arrays, but don't create entries for the objects themselves
+                    Object.entries(data).forEach(([key, value]) => {
+                        const newPath = parentPath ? `${parentPath}.${key}` : key;
+
+                        if (Array.isArray(value)) {
+                            // Process this array to create entries
+                            this.flattenJSON(value, filename, newPath);
+                        } else if (typeof value === 'object' && value !== null) {
+                            // Continue traversing to find more arrays
+                            this.flattenJSON(value, filename, newPath);
+                        }
+                    });
+                }
+            }
+
+            detectReferences() {
+                const allIds = new Set();
+                
+                this.flattenedData.forEach(item => {
+                    if (item.data.id) {
+                        allIds.add(item.data.id.toString().toLowerCase());
+                    }
+                });
+
+                debugLog(`Found ${allIds.size} unique IDs`);
+
+                this.flattenedData.forEach(item => {
+                    this.scanForReferences(item.data, allIds, item.filename, item.id);
+                });
+            }
+
+            scanForReferences(obj, allIds, sourceFilename, sourceItemId) {
+                if (typeof obj === 'string') {
+                    const lowerValue = obj.toLowerCase();
+                    if (allIds.has(lowerValue)) {
+                        if (!this.references.has(obj)) {
+                            this.references.set(obj, []);
+                        }
+                        this.references.get(obj).push({
+                            sourceFilename,
+                            sourceItemId
+                        });
+                    }
+                } else if (Array.isArray(obj)) {
+                    obj.forEach(item => this.scanForReferences(item, allIds, sourceFilename, sourceItemId));
+                } else if (typeof obj === 'object' && obj !== null) {
+                    Object.values(obj).forEach(value => this.scanForReferences(value, allIds, sourceFilename, sourceItemId));
+                }
+            }
+
+            handleGlobalSearch(searchTerm) {
+                this.currentGlobalFilter = searchTerm.toLowerCase();
+                this.currentLocalSearchFilter = '';
+                document.getElementById('localSearch').value = '';
+
+                // Global search should override file filter and search all files
+                if (searchTerm.trim()) {
+                    this.currentFileFilter = '';
+                    document.getElementById('fileFilter').value = '';
+                }
+
+                debugLog(`Global search: "${searchTerm}" (searching all files)`);
+                this.updateDataDisplay();
+            }
+
+            handleLocalSearch(searchTerm) {
+                this.currentLocalSearchFilter = searchTerm.toLowerCase();
+                debugLog(`Local search: "${searchTerm}"`);
+                this.updateDataDisplay();
+            }
+
+            handleFileFilter(filename) {
+                this.currentFileFilter = filename;
+                debugLog(`File filter: "${filename}"`);
+                this.updateDataDisplay();
+            }
+
+            updateUI() {
+                document.getElementById('searchSection').style.display = 'block';
+                document.getElementById('statsSection').style.display = 'block';
+                document.getElementById('dataSection').style.display = 'block';
+
+                document.getElementById('filesCount').textContent = Object.keys(this.jsonData).length;
+                document.getElementById('itemsCount').textContent = this.flattenedData.length;
+                document.getElementById('referencesCount').textContent = this.references.size;
+
+                const fileFilter = document.getElementById('fileFilter');
+                fileFilter.innerHTML = '<option value="">All Files</option>';
+                Object.keys(this.jsonData).forEach(filename => {
+                    const option = document.createElement('option');
+                    option.value = filename;
+                    option.textContent = filename;
+                    fileFilter.appendChild(option);
+                });
+
+                this.updateDataDisplay();
+            }
+
+            updateDataDisplay() {
+                let filteredItems = [...this.flattenedData];
+
+                if (this.currentFileFilter) {
+                    filteredItems = filteredItems.filter(item => item.filename === this.currentFileFilter);
+                }
+
+                if (this.currentGlobalFilter) {
+                    filteredItems = filteredItems.filter(item => 
+                        this.itemContainsSearchTerm(item, this.currentGlobalFilter)
+                    );
+                }
+
+                if (this.currentLocalSearchFilter) {
+                    filteredItems = filteredItems.filter(item =>
+                        this.itemContainsSearchTerm(item, this.currentLocalSearchFilter)
+                    );
+                }
+
+                const dataList = document.getElementById('dataList');
+                dataList.innerHTML = '';
+                
+                filteredItems.forEach(item => {
+                    this.currentItemId = item.id;
+                    const itemElement = this.createItemElement(item);
+                    dataList.appendChild(itemElement);
+                });
+
+                const activeSearchTerm = this.currentGlobalFilter || this.currentLocalSearchFilter;
+                if (activeSearchTerm) {
+                    this.navigateToDefinition(activeSearchTerm, filteredItems);
+                }
+            }
+
+            navigateToDefinition(searchTerm, items) {
+                const definitionItem = items.find(item => {
+                    return item.data.id && item.data.id.toLowerCase() === searchTerm.toLowerCase();
+                });
+
+                if (definitionItem) {
+                    setTimeout(() => {
+                        this.scrollToItem(definitionItem.id);
+                    }, 200);
+                }
+            }
+
+            itemContainsSearchTerm(item, searchTerm) {
+                const lowerSearchTerm = searchTerm.toLowerCase();
+                
+                const searchInValue = (value) => {
+                    if (typeof value === 'string') {
+                        return value.toLowerCase().includes(lowerSearchTerm);
+                    } else if (typeof value === 'number') {
+                        return String(value).toLowerCase().includes(lowerSearchTerm);
+                    } else if (Array.isArray(value)) {
+                        return value.some(item => searchInValue(item));
+                    } else if (typeof value === 'object' && value !== null) {
+                        return Object.values(value).some(v => searchInValue(v));
+                    }
+                    return false;
+                };
+                
+                return searchInValue(item.data);
+            }
+
+            createItemElement(item) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'list-item';
+                itemDiv.id = item.id;
+
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'item-header';
+
+                const headerContent = document.createElement('div');
+                
+                if (item.title) {
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'item-title';
+                    titleDiv.textContent = item.title;
+                    headerContent.appendChild(titleDiv);
+                }
+
+                const sourceDiv = document.createElement('div');
+                sourceDiv.className = 'item-source';
+                let sourceText = '📄 ' + item.filename;
+                
+                if (item.parentPath) {
+                    sourceText += ' (' + item.parentPath + ')';
+                }
+                
+                sourceDiv.textContent = sourceText;
+                
+                const activeSearchTerm = this.currentGlobalFilter || this.currentLocalSearchFilter;
+                if (activeSearchTerm) {
+                    const matchIndicator = document.createElement('span');
+                    matchIndicator.style.marginLeft = '8px';
+                    matchIndicator.style.padding = '1px 4px';
+                    matchIndicator.style.background = '#fff3cd';
+                    matchIndicator.style.color = '#856404';
+                    matchIndicator.style.fontSize = '0.75rem';
+                    matchIndicator.style.borderRadius = '3px';
+                    matchIndicator.style.fontWeight = '600';
+                    matchIndicator.textContent = '"' + activeSearchTerm + '" match';
+                    sourceDiv.appendChild(matchIndicator);
+                }
+
+                headerContent.appendChild(sourceDiv);
+                headerDiv.appendChild(headerContent);
+                itemDiv.appendChild(headerDiv);
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'item-content';
+
+                Object.entries(item.data).forEach(([key, value]) => {
+                    const row = document.createElement('div');
+                    row.className = 'content-row';
+
+                    const keySpan = document.createElement('span');
+                    keySpan.className = 'content-key';
+                    keySpan.textContent = key + ':';
+                    row.appendChild(keySpan);
+
+                    const valueSpan = document.createElement('span');
+                    valueSpan.className = 'content-value';
+                    
+                    this.renderValue(value, valueSpan, key);
+                    
+                    row.appendChild(valueSpan);
+                    contentDiv.appendChild(row);
+                });
+
+                itemDiv.appendChild(contentDiv);
+                return itemDiv;
+            }
+
+            renderValue(value, container, key) {
+                const activeSearchTerm = this.currentGlobalFilter || this.currentLocalSearchFilter;
+
+                if (Array.isArray(value)) {
+                    const arrayText = `[Array: ${value.length} item${value.length !== 1 ? 's' : ''}]`;
+                    container.textContent = arrayText;
+                    container.classList.add('expandable');
+                    container.style.cursor = 'pointer';
+                    
+                    let isExpanded = false;
+                    let expandedDiv = null;
+
+                    container.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        
+                        if (!isExpanded) {
+                            expandedDiv = document.createElement('div');
+                            expandedDiv.className = 'expanded-content';
+                            
+                            value.forEach((item, index) => {
+                                if (index > 0) {
+                                    expandedDiv.appendChild(document.createElement('br'));
+                                    expandedDiv.appendChild(document.createElement('br'));
+                                }
+                                
+                                const indexLabel = document.createElement('strong');
+                                indexLabel.textContent = `[${index}]: `;
+                                expandedDiv.appendChild(indexLabel);
+                                
+                                if (typeof item === 'object' && item !== null) {
+                                    const itemDiv = document.createElement('div');
+                                    itemDiv.style.marginLeft = '20px';
+                                    itemDiv.style.marginTop = '5px';
+                                    
+                                    this.renderExpandedObject(item, itemDiv);
+                                    
+                                    expandedDiv.appendChild(itemDiv);
+                                } else {
+                                    this.renderValueInExpanded(item, expandedDiv);
+                                }
+                            });
+                            
+                            container.parentElement.appendChild(expandedDiv);
+                            container.textContent = `[Array: ${value.length} item${value.length !== 1 ? 's' : ''}] ▼`;
+                            isExpanded = true;
+                        } else {
+                            if (expandedDiv && expandedDiv.parentElement) {
+                                expandedDiv.parentElement.removeChild(expandedDiv);
+                            }
+                            container.textContent = arrayText;
+                            isExpanded = false;
+                            expandedDiv = null;
+                        }
+                    });
+
+                } else if (typeof value === 'object' && value !== null) {
+                    const keys = Object.keys(value);
+                    const objectText = `{Object: ${keys.length} key${keys.length !== 1 ? 's' : ''}}`;
+                    container.textContent = objectText;
+                    container.classList.add('expandable');
+                    container.style.cursor = 'pointer';
+                    
+                    let isExpanded = false;
+                    let expandedDiv = null;
+
+                    container.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        
+                        if (!isExpanded) {
+                            expandedDiv = document.createElement('div');
+                            expandedDiv.className = 'expanded-content';
+                            
+                            this.renderExpandedObject(value, expandedDiv);
+                            
+                            container.parentElement.appendChild(expandedDiv);
+                            container.textContent = `{Object: ${keys.length} key${keys.length !== 1 ? 's' : ''}} ▼`;
+                            isExpanded = true;
+                        } else {
+                            if (expandedDiv && expandedDiv.parentElement) {
+                                expandedDiv.parentElement.removeChild(expandedDiv);
+                            }
+                            container.textContent = objectText;
+                            isExpanded = false;
+                            expandedDiv = null;
+                        }
+                    });
+
+                } else {
+                    const valueStr = String(value);
+                    const targetRef = this.findTargetForReference(valueStr);
+
+                    if (targetRef) {
+                        container.textContent = valueStr;
+                        container.classList.add('clickable');
+                        container.addEventListener('click', () => this.navigateToReference(targetRef));
+
+                        const refCount = this.references.get(valueStr)?.length || 0;
+                        if (refCount > 0) {
+                            const indicator = document.createElement('span');
+                            indicator.className = 'reference-indicator';
+                            indicator.textContent = '🔗 ' + refCount + ' reference' + (refCount !== 1 ? 's' : '');
+                            container.appendChild(indicator);
+                            
+                            return;
+                        }
+                    }
+                    
+                    if (activeSearchTerm && valueStr.toLowerCase().includes(activeSearchTerm)) {
+                        this.highlightSearchTerm(valueStr, activeSearchTerm, container);
+                    } else {
+                        container.appendChild(document.createTextNode(valueStr));
+                    }
+                }
+            }
+
+            renderExpandedObject(obj, container) {
+                container.style.whiteSpace = 'normal';
+                container.style.wordBreak = 'break-word';
+                
+                Object.entries(obj).forEach(([key, value], index) => {
+                    if (index > 0) {
+                        const separator = document.createElement('br');
+                        container.appendChild(separator);
+                    }
+                    
+                    const keySpan = document.createElement('span');
+                    keySpan.style.fontWeight = 'bold';
+                    keySpan.style.color = '#4facfe';
+                    keySpan.textContent = key + ': ';
+                    container.appendChild(keySpan);
+                    
+                    this.renderValueInExpanded(value, container);
+                });
+            }
+
+            renderValueInExpanded(value, container) {
+                const activeSearchTerm = this.currentGlobalFilter || this.currentLocalSearchFilter;
+
+                if (Array.isArray(value)) {
+                    const arraySpan = document.createElement('span');
+                    arraySpan.textContent = `[Array: ${value.length} items]`;
+                    arraySpan.style.color = '#cc6600';
+                    container.appendChild(arraySpan);
+                } else if (typeof value === 'object' && value !== null) {
+                    const keys = Object.keys(value);
+                    const objSpan = document.createElement('span');
+                    objSpan.textContent = `{Object: ${keys.length} keys}`;
+                    objSpan.style.color = '#cc6600';
+                    container.appendChild(objSpan);
+                } else {
+                    const valueStr = String(value);
+                    const targetRef = this.findTargetForReference(valueStr);
+
+                    if (targetRef) {
+                        const link = document.createElement('span');
+                        link.textContent = valueStr;
+                        link.style.color = '#0066cc';
+                        link.style.textDecoration = 'underline';
+                        link.style.cursor = 'pointer';
+                        link.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.navigateToReference(targetRef);
+                        });
+                        container.appendChild(link);
+
+                        const refCount = this.references.get(valueStr)?.length || 0;
+                        if (refCount > 0) {
+                            const indicator = document.createElement('span');
+                            indicator.style.marginLeft = '5px';
+                            indicator.style.padding = '2px 6px';
+                            indicator.style.background = '#ffeaa7';
+                            indicator.style.color = '#2d3436';
+                            indicator.style.borderRadius = '5px';
+                            indicator.style.fontSize = '0.75rem';
+                            indicator.style.fontWeight = '600';
+                            indicator.textContent = '🔗 ' + refCount + ' ref' + (refCount !== 1 ? 's' : '');
+                            container.appendChild(indicator);
+                            
+                            return;
+                        }
+                    }
+                    
+                    if (activeSearchTerm && valueStr.toLowerCase().includes(activeSearchTerm)) {
+                        this.highlightSearchTerm(valueStr, activeSearchTerm, container);
+                    } else {
+                        container.appendChild(document.createTextNode(valueStr));
+                    }
+                }
+            }
+
+            highlightSearchTerm(text, searchTerm, container) {
+                const lowerText = text.toLowerCase();
+                const lowerSearchTerm = searchTerm.toLowerCase();
+                let lastIndex = 0;
+                let index = lowerText.indexOf(lowerSearchTerm);
+
+                while (index !== -1) {
+                    if (index > lastIndex) {
+                        container.appendChild(document.createTextNode(text.substring(lastIndex, index)));
+                    }
+
+                    const highlight = document.createElement('span');
+                    highlight.className = 'highlight-term';
+                    highlight.textContent = text.substring(index, index + searchTerm.length);
+                    container.appendChild(highlight);
+
+                    lastIndex = index + searchTerm.length;
+                    index = lowerText.indexOf(lowerSearchTerm, lastIndex);
+                }
+
+                if (lastIndex < text.length) {
+                    container.appendChild(document.createTextNode(text.substring(lastIndex)));
+                }
+            }
+
+            navigateToReference(targetRef) {
+                debugLog(`Navigating to reference: ${targetRef}`);
+                
+                const targetItem = this.flattenedData.find(item => {
+                    if (item.data.id) {
+                        return item.data.id.toString().toLowerCase() === targetRef.toLowerCase();
+                    }
+                    return false;
+                });
+
+                if (targetItem) {
+                    this.scrollToItem(targetItem.id);
+                } else {
+                    debugLog(`Target not found for reference: ${targetRef}`);
+                }
+            }
+
+            scrollToItem(itemId) {
+                const element = document.getElementById(itemId);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.classList.add('highlight');
+                    setTimeout(() => element.classList.remove('highlight'), 1000);
+                } else {
+                    debugLog(`Element not found: ${itemId}`);
+                }
+            }
+
+            findTargetForReference(value) {
+                if (typeof value !== 'string') return null;
+
+                const lowerValue = value.toLowerCase();
+                for (const item of this.flattenedData) {
+                    if (item.data.id && item.data.id.toString().toLowerCase() === lowerValue) {
+                        return item.data.id;
+                    }
+                }
+                return null;
+            }
+
+        }
+
+        let viewer;
+        try {
+            viewer = new JSONDataViewer();
+            debugLog('Application initialized successfully');
+        } catch (error) {
+            debugLog('Failed to initialize application: ' + error.message);
+        }
+    </script>
+</body>
+</html>
